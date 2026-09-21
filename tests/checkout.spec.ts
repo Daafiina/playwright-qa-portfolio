@@ -1,41 +1,32 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
+import { CheckoutPage } from '../pages/CheckoutPage';
+import { users, checkoutData } from '../data/testData';
 
 test('User can complete checkout form', async ({ page }) => {
+  const loginPage = new LoginPage(page);
+  const checkoutPage = new CheckoutPage(page);
 
-  // 1. Open website
-  await page.goto('https://www.saucedemo.com/');
+  await loginPage.open();
 
-  // 2. Login
-  await page.getByPlaceholder('Username').fill('standard_user');
-  await page.getByPlaceholder('Password').fill('secret_sauce');
-  await page.getByRole('button', { name: 'Login' }).click();
+  await loginPage.login(
+    users.validUser.username,
+    users.validUser.password
+  );
 
-  // 3. Add product to cart
-  await page.getByRole('button', { name: 'Add to cart' }).first().click();
+  await checkoutPage.addFirstProductToCart();
+  await checkoutPage.openCart();
+  await checkoutPage.startCheckout();
 
-  // 4. Open cart
-  await page.locator('.shopping_cart_link').click();
+  await checkoutPage.fillCustomerInformation(
+    checkoutData.firstName,
+    checkoutData.lastName,
+    checkoutData.postalCode
+  );
 
-  // 5. Go to checkout
-  await page.getByRole('button', { name: 'Checkout' }).click();
+  await checkoutPage.continueCheckout();
+  await checkoutPage.verifyOverviewPage();
 
-  // 6. Fill checkout form
-  await page.getByPlaceholder('First Name').fill('Dafina');
-  await page.getByPlaceholder('Last Name').fill('Aliji');
-  await page.getByPlaceholder('Zip/Postal Code').fill('10000');
-
-  // 7. Continue
-  await page.getByRole('button', { name: 'Continue' }).click();
-
-  // 8. Check checkout overview
-  await expect(page.getByText('Checkout: Overview')).toBeVisible();
-
-  // 9. Finish order
-  await page.getByRole('button', { name: 'Finish' }).click();
-
-  // 10. Verify successful order
-  await expect(
-    page.getByText('Thank you for your order!')
-  ).toBeVisible();
-
+  await checkoutPage.finishOrder();
+  await checkoutPage.verifyOrderSuccess();
 });

@@ -1,35 +1,31 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
+import { LoginPage } from '../pages/LoginPage';
+import { users } from '../data/testData';
 
 test.describe('Login Tests', () => {
 
   test('User can login with valid credentials', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
-    await page.goto('https://www.saucedemo.com/');
+    await loginPage.open();
+    await loginPage.login(
+      users.validUser.username,
+      users.validUser.password
+    );
 
-    await page.getByPlaceholder('Username').fill('standard_user');
-    await page.getByPlaceholder('Password').fill('secret_sauce');
-
-    await page.getByRole('button', { name: 'Login' }).click();
-
-    await expect(page).toHaveURL(/inventory/);
-
-    await expect(
-      page.getByText('Products')
-    ).toBeVisible();
-
+    await loginPage.verifySuccessfulLogin();
   });
 
   test('User cannot login with invalid credentials', async ({ page }) => {
+    const loginPage = new LoginPage(page);
 
-  await page.goto('https://www.saucedemo.com/');
+    await loginPage.open();
+    await loginPage.login(
+      users.invalidUser.username,
+      users.invalidUser.password
+    );
 
-  await page.getByPlaceholder('Username').fill('wrong_user');
-  await page.getByPlaceholder('Password').fill('wrong_password');
-
-  await page.getByRole('button', { name: 'Login' }).click();
-
-  await expect(page.getByText(/Epic sadface/i)).toBeVisible();
-
-});
+    await loginPage.verifyLoginError();
+  });
 
 });
