@@ -8,6 +8,11 @@ export const users = {
     username: process.env.INVALID_USERNAME!,
     password: process.env.INVALID_PASSWORD!,
   },
+
+  lockedUser: {
+    username: "locked_out_user",
+    password: "secret_sauce",
+  },
 };
 
 export const checkoutData = {
